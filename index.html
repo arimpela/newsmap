@@ -1,7 +1,49 @@
 <!DOCTYPE html>
 <html>
+<head>
+    <title>News Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+</head>
 <body>
-<h1>Hello World</h1>
-<p>I'm hosted with GitHub Pages.</p>
+    <div id="mapid" style="width: 100%; height: 600px;"></div>
+
+    <script>
+    // Create the map
+    var mymap = L.map('mapid').setView([51.505, -0.09], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors',
+        maxZoom: 19,
+    }).addTo(mymap);
+
+    // When a country is clicked, fetch and display news
+    // This will need to be adapted to work with your actual geographic data
+    mymap.on('click', function(e) {
+        // Here you would typically get the name of the country that was clicked,
+        // but for this example we'll use a static country name
+        var countryName = "Finland";
+
+        // Fetch news data for the clicked country
+        var apiKey = "your-api-key-here";
+        var apiUrl = "https://api.bing.microsoft.com/v7.0/news/search?q=" + encodeURIComponent(countryName) + "&count=5";
+        fetch(apiUrl, {
+            headers: {
+                "Ocp-Apim-Subscription-Key": apiKey,
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Extract the headlines from the news data
+            var headlines = data.value.map(article => article.name);
+
+            // Create a popup with the headlines
+            var popupContent = "<h2>Top News in " + countryName + "</h2>" + headlines.join("<br>");
+            L.popup()
+                .setLatLng(e.latlng)
+                .setContent(popupContent)
+                .openOn(mymap);
+        });
+    });
+    </script>
 </body>
 </html>
